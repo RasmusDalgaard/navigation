@@ -18,19 +18,20 @@ ox.plot_graph(graph_proj)
 nodes_proj, edges_proj = ox.graph_to_gdfs(graph_proj)
 
 # Calculate the coverage area (m2) of the street network
-#convex_hull = edges_proj.unary_union.convex_hull
-#area = convex_hull.area
+convex_hull = edges_proj.unary_union.convex_hull
+area = convex_hull.area
 
 # Calculate statistics
-#stats = ox.basic_stats(graph_proj, area=area)
+stats = ox.basic_stats(graph_proj, area=area)
 
 # Centroid (center of area) 
-#centroid = convex_hull.centroid
+centroid = convex_hull.centroid
 #print(centroid)
 
 # Get maximum x coordinate of the nodes (the most eastern x_coordinate in the area)
-#nodes_proj['X'] = nodes_proj.x.astype(float)
-#nodes_proj.head()
+nodes_proj['X'] = nodes_proj.x.astype(float)
+print(nodes_proj.head())
+print(nodes_proj['X'])
 #max_x = nodes_proj['X'].max()
 
 # Retrieve most eastern node using the max_x
@@ -39,11 +40,19 @@ nodes_proj, edges_proj = ox.graph_to_gdfs(graph_proj)
 
 # Get origin x and y coordinates
 #origin_x = centroid.x
+#print(origin_x)
 #origin_y = centroid.y
+#print(origin_y)
 
 # Get target x and y coordinates
 #target_x = target.x
 #target_y = target.y
+
+# Find ID of closest nodes
+#source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
+#print(source_node)
+#target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
+#print(target_node)
 
 source_latLng = (55.75404261530074, 12.338784557007337)
 target_latLng = (55.72361119849776, 12.376059277332928)
