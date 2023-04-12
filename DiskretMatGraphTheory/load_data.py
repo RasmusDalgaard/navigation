@@ -30,37 +30,36 @@ centroid = convex_hull.centroid
 
 # Get maximum x coordinate of the nodes (the most eastern x_coordinate in the area)
 nodes_proj['X'] = nodes_proj.x.astype(float)
-print(nodes_proj.head())
-print(nodes_proj['X'])
-#max_x = nodes_proj['X'].max()
+
+max_x = nodes_proj['X'].max()
 
 # Retrieve most eastern node using the max_x
-#target = nodes_proj.loc[nodes_proj['X']==max_x, 'geometry'].values[0]
-#print(target)
+target = nodes_proj.loc[nodes_proj['X']==max_x, 'geometry'].values[0]
+print(target)
 
 # Get origin x and y coordinates
-#origin_x = centroid.x
-#print(origin_x)
-#origin_y = centroid.y
-#print(origin_y)
+origin_x = centroid.x
+print(origin_x)
+origin_y = centroid.y
+print(origin_y)
 
 # Get target x and y coordinates
-#target_x = target.x
-#target_y = target.y
+target_x = target.x
+target_y = target.y
 
 # Find ID of closest nodes
-#source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
-#print(source_node)
-#target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
-#print(target_node)
-
-source_latLng = (55.75404261530074, 12.338784557007337)
-target_latLng = (55.72361119849776, 12.376059277332928)
-
-# Find ID of closest nodes
-source_node = ox.nearest_nodes(graph_proj, source_latLng[1], source_latLng[0])
+source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
 print(source_node)
-target_node = ox.nearest_nodes(graph_proj, target_latLng[1], target_latLng[0])
+target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
+print(target_node)
+
+#source_latLng = (55.75404261530074, 12.338784557007337)
+#target_latLng = (55.72361119849776, 12.376059277332928)
+
+# Find ID of closest nodes
+source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
+print(source_node)
+target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
 print(target_node)
 
 # Find shortest path (Returns a set of node ids)
