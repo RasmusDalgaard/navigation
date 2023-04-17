@@ -1,12 +1,11 @@
 # import osmnx
 import osmnx as ox
 import networkx as nx
-import shapely.geometry
+import shapely.geometry as sh
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
 place_name = "Ballerup Kommune, Region Hovedstaden, Danmark"
-
 # Graph
 graph = ox.graph_from_place(place_name, network_type="drive")
 
@@ -14,8 +13,21 @@ graph = ox.graph_from_place(place_name, network_type="drive")
 graph_proj = ox.project_graph(graph)
 ox.plot_graph(graph_proj)
 
+#NEW
+address1 = "Violvænget 14, Ballerup"
+address2 = "Hybenvænget 25, Ballerup"
+#address1 = str(input())
+#address2 = str(input())
+points_list = [sh.Point(reversed(ox.geocoder.geocode(address1))), sh.Point(reversed(ox.geocoder.geocode(address2)))]
+
+Gc = ox.consolidate_intersections(graph_proj, rebuild_graph=True, tolerance=20, dead_ends=False)
+points = gpd.GeoSeries(points_list, crs='epsg:4326')
+points_proj = points.to_crs(graph_proj.graph['crs'])
+nearest_nodes = [ox.get_nearest_node(Gc, (pt.y, pt.x), 'euclidean') for pt in points_proj]
+#/NEW
+
 # Get nodes and edges
-nodes_proj, edges_proj = ox.graph_to_gdfs(graph_proj)
+nodes_proj, edges_proj = ox.graph_to_gdfs(Gc)
 
 # Calculate the coverage area (m2) of the street network
 convex_hull = edges_proj.unary_union.convex_hull
@@ -26,7 +38,6 @@ stats = ox.basic_stats(graph_proj, area=area)
 
 # Centroid (center of area) 
 centroid = convex_hull.centroid
-#print(centroid)
 
 # Get maximum x coordinate of the nodes (the most eastern x_coordinate in the area)
 nodes_proj['X'] = nodes_proj.x.astype(float)
@@ -35,13 +46,10 @@ max_x = nodes_proj['X'].max()
 
 # Retrieve most eastern node using the max_x
 target = nodes_proj.loc[nodes_proj['X']==max_x, 'geometry'].values[0]
-print(target)
 
 # Get origin x and y coordinates
 origin_x = centroid.x
-print(origin_x)
 origin_y = centroid.y
-print(origin_y)
 
 # Get target x and y coordinates
 target_x = target.x
@@ -49,23 +57,18 @@ target_y = target.y
 
 # Find ID of closest nodes
 source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
-print(source_node)
 target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
-print(target_node)
-
-#source_latLng = (55.75404261530074, 12.338784557007337)
-#target_latLng = (55.72361119849776, 12.376059277332928)
 
 # Find ID of closest nodes
 source_node = ox.nearest_nodes(graph_proj, origin_x, origin_y)
-print(source_node)
 target_node = ox.nearest_nodes(graph_proj, target_x, target_y)
-print(target_node)
 
 # Find shortest path (Returns a set of node ids)
-route = nx.shortest_path(G=graph_proj, source=source_node, target=target_node, weight='distance')
+route = nx.shortest_path(G=Gc, source=nearest_nodes[0], target=nearest_nodes[1], weight='distance')
 print(route)
-fig, ax = ox.plot_graph_route(graph_proj, route)
+route_edges = set(ox.utils_graph.get_route_edge_attributes(Gc, route, "name"))
+print(route_edges)
+fig, ax = ox.plot_graph_route(Gc, route)
 
 # Extract info about nodes along shortest path
 route_nodes = nodes_proj.loc[route] # This is a geo dataframe with all the nodes along the route
